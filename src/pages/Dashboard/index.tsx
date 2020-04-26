@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 
-import { View, Image } from 'react-native';
+import { View, Alert, FlatList } from 'react-native';
 
 import formatValue from '../../utils/formatValue';
 import { useCart } from '../../hooks/cart';
@@ -13,7 +13,6 @@ import {
   Container,
   ProductContainer,
   ProductImage,
-  ProductList,
   Product,
   ProductTitle,
   PriceContainer,
@@ -21,7 +20,7 @@ import {
   ProductButton,
 } from './styles';
 
-interface Product {
+export interface Product {
   id: string;
   title: string;
   image_url: string;
@@ -35,27 +34,37 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     async function loadProducts(): Promise<void> {
-      // TODO
+      try {
+        const { data } = await api.get('/products');
+
+        setProducts(data);
+      } catch (err) {
+        Alert.alert(
+          'Erro ao buscar produtos',
+          'Não foi possível buscar os produtos, verifique a conexão',
+        );
+      }
     }
 
     loadProducts();
   }, []);
 
   function handleAddToCart(item: Product): void {
-    // TODO
+    addToCart(item);
   }
 
   return (
     <Container>
       <ProductContainer>
-        <ProductList
+        <FlatList<Product>
           data={products}
           keyExtractor={item => item.id}
           ListFooterComponent={<View />}
+          numColumns={2}
           ListFooterComponentStyle={{
             height: 80,
           }}
-          renderItem={({ item }) => (
+          renderItem={({ item }: { item: Product }) => (
             <Product>
               <ProductImage source={{ uri: item.image_url }} />
               <ProductTitle>{item.title}</ProductTitle>
